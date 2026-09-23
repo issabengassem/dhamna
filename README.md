@@ -20,3 +20,4 @@ Open http://127.0.0.1:3000. For production, run `npm.cmd run build` followed by 
 - Locally bundled Cormorant Garamond and Manrope fonts; Next.js optimized generated images.
 
 Browser verification is in `scripts/verify.mjs` and runs against a local server.
+
