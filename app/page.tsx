@@ -11,6 +11,7 @@ const scenes = [
 ];
 function Arrow({diagonal=false}:{diagonal?:boolean}){return <span aria-hidden="true">{diagonal?'↗':'↗'}</span>}
 export default function Home(){
+  const [heroEyebrow,setHeroEyebrow]=useState('A SLOWER STATE OF BEING');
   const [menu,setMenu]=useState(false);
   const [paused,setPaused]=useState(false);
   const [scene,setScene]=useState(2);
@@ -38,6 +39,14 @@ export default function Home(){
   },[menu]);
   useEffect(()=>{document.documentElement.dataset.motion=paused?'paused':'playing'},[paused]);
   useEffect(()=>{
+    let active=true;
+    fetch('/api/cms/home')
+      .then(response=>response.ok?response.json():null)
+      .then(data=>{if(active&&typeof data?.heroEyebrow==='string')setHeroEyebrow(data.heroEyebrow)})
+      .catch(()=>{});
+    return()=>{active=false};
+  },[]);
+  useEffect(()=>{
     const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}}),{threshold:0.08});
     document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));return()=>observer.disconnect();
   },[]);
@@ -61,7 +70,7 @@ export default function Home(){
       <section className="hero" id="home" ref={hero} onPointerMove={e=>{if(paused||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const rect=e.currentTarget.getBoundingClientRect();e.currentTarget.style.setProperty('--pointer-x',`${((e.clientX-rect.left)/rect.width-.5)*10}px`);e.currentTarget.style.setProperty('--pointer-y',`${((e.clientY-rect.top)/rect.height-.5)*6}px`)}}>
         <div className="hero-camera"><Image src="/images/hero.png" alt="An imagined stone villa with a glowing infinity pool on a quiet coastline at sunset" fill priority sizes="100vw" quality={90}/></div>
         <div className="hero-shade"/><div className="light-wash"/>
-        <div className="hero-copy"><div className="eyebrow hero-kicker"><span className="tiny-sun"/> A SLOWER STATE OF BEING</div><h1>Somewhere,<br/><em>closer to yourself.</em></h1><p>A quiet hideaway. An endless horizon.<br/>The luxury of simply being.</p><a className="hero-explore" href="#retreat">Discover DHAMNA <span aria-hidden="true">↓</span></a></div>
+        <div className="hero-copy"><div className="eyebrow hero-kicker"><span className="tiny-sun"/> {heroEyebrow}</div><h1>Somewhere,<br/><em>closer to yourself.</em></h1><p>A quiet hideaway. An endless horizon.<br/>The luxury of simply being.</p><a className="hero-explore" href="#retreat">Discover DHAMNA <span aria-hidden="true">↓</span></a></div>
         <div className="hero-bottom"><span>THE COAST IS CALLING</span><span className="hero-bottom-center">A place to do a little less. And feel a little more.</span><button className="motion-button" onClick={()=>setPaused(!paused)} aria-pressed={paused} aria-label={paused?'Play ambient motion':'Pause ambient motion'}><span aria-hidden="true">{paused?'▷':'Ⅱ'}</span>{paused?'Play motion':'Pause motion'}</button></div>
         <span className="hero-side">SALT IN THE AIR. SPACE IN YOUR DAY.</span>
       </section>
